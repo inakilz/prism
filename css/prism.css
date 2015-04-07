@@ -42,7 +42,7 @@
   -o-transform-origin: 0 100px 0;
   animation-transform-origin: 0 100px 0;
 }
-#prism figure {
+#prism div {
   display: none;
   position: absolute;
   width: 350px;
@@ -54,7 +54,7 @@
   text-align: center;
   font-size: 100px;
 }
-#prism figure.layer-1 {
+#prism div.layer-1 {
   display: block;
   background-color: #20B2AA;
   opacity: 1;
@@ -89,7 +89,7 @@
   -o-animation-duration: 16s;
   animation-animation-duration: 16s;
 }
-#prism figure.layer-2 {
+#prism div.layer-2 {
   display: block;
   background-color: #87CEFA;
   opacity: 0;
@@ -124,7 +124,7 @@
   -o-animation-duration: 16s;
   animation-animation-duration: 16s;
 }
-#prism figure.layer-3 {
+#prism div.layer-3 {
   display: block;
   background-color: #F0E68C;
   opacity: 0;
@@ -159,7 +159,7 @@
   -o-animation-duration: 16s;
   animation-animation-duration: 16s;
 }
-#prism figure.layer-4 {
+#prism div.layer-4 {
   display: block;
   background-color: #F08080;
   opacity: 0;
