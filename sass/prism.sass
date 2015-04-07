@@ -1,0 +1,113 @@
+@mixin keyframes($name) {
+  @-webkit-keyframes #{$name} { @content; }
+  @-moz-keyframes #{$name} { @content; }
+  @-ms-keyframes #{$name} { @content; }
+  @keyframes #{$name} { @content; }
+}
+@mixin animation-name($name) {
+  -ms-animation-name: $name;
+  -moz-animation-name: $name;
+  -webkit-animation-name: $name;
+  animation-name: $name;
+}
+@mixin animation-duration($duration) {
+  -ms-animation-duration: $duration;
+  -moz-animation-duration: $duration;
+  -webkit-animation-duration: $duration;
+  animation-duration: $duration;
+}
+@mixin animation-timing-function($timing) {
+  -ms-animation-timing-function: $timing;
+  -moz-animation-timing-function: $timing;
+  -webkit-animation-timing-function: $timing;
+  animation-timing-function: $timing;
+}
+@mixin animation-iteration-count($iteration) {
+  -ms-animation-iteration-count: $iteration;
+  -moz-animation-iteration-count: $iteration;
+  -webkit-animation-iteration-count: $iteration;
+  animation-iteration-count: $iteration;
+}
+@mixin animation($animation) {
+  -ms-animation: $animation;
+  -moz-animation: $animation;
+  -webkit-animation: $animation;
+  animation: $animation;
+}
+@mixin transform($rules...) {
+  -ms-transform: $rules;
+  -moz-transform: $rules;
+  -webkit-transform: $rules;
+  transform: $rules;
+}
+@mixin transform-origin($rules...) {
+  -ms-transform-origin: $rules;
+  -moz-transform-origin: $rules;
+  -webkit-transform-origin: $rules;
+  transform-origin: $rules;
+}
+@mixin transform-style($rules) {
+  -ms-transform-style: $rules;
+  -moz-transform-style: $rules;
+  -webkit-transform-style: $rules;
+  transform-style: $rules;
+}
+@mixin backface-visibility($value) {
+  -ms-backface-visibility: $value;
+  -moz-backface-visibility: $value;
+  -webkit-backface-visibility: $value;
+  backface-visibility: $value;
+}
+
+@include keyframes(spincube) {
+    0%,20%    { @include transform(rotateX(0deg)); }
+    25%,45%   { @include transform(rotateX(-90deg)); }
+    50%,70%   { @include transform(rotateX(-180deg)); }
+    75%,95%   { @include transform(rotateX(-270deg)); }
+    100%  { @include transform(rotateX(-360deg)); }
+}
+@mixin face-cube($trans: 0px, $rotX : 0deg, $rotY : 0deg, $rotZ : 0deg) {
+  @include transform(rotateX($rotX) rotateY($rotY) rotateZ($rotZ)
+translateZ($trans));
+  @include backface-visibility(hidden);
+}
+
+$time: 20s;
+$height: 280px;
+$width: 460px;
+$trans: $height/2;
+.cube {
+  @include animation-name(spincube);
+  @include animation-timing-function(ease-in-out);
+  @include animation-iteration-count(infinite);
+  @include animation-duration($time);
+  @include transform-style(preserve-3d);
+  @include transform-origin(0 $trans 0);
+}
+.cube div {
+  position: absolute;
+  width: $width;
+  height: $height;
+  border: 1px solid #ccc;
+  background: rgba(255,255,255,0.8);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+  line-height: $height;
+  text-align: center;
+  font-size: 100px;
+}
+.cube div.front {
+  background-color: #20B2AA;
+  @include face-cube($trans);
+}
+.cube div.top {
+  background-color: #87CEFA;
+  @include face-cube($trans, 90deg);
+}
+.cube div.back {
+  background-color: #F0E68C;
+  @include face-cube($trans, 0deg, 180deg, 180deg);
+}
+.cube div.bottom {
+  background-color: #F08080;
+  @include face-cube($trans, -90deg);
+}
