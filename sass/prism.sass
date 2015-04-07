@@ -1,113 +1,116 @@
+@mixin prefixed-browser($action, $rules...) {
+  -webkit-#{$action}: $rules;
+  -moz-#{$action}: $rules;
+  -ms-#{$action}: $rules;
+  -o-#{$action}: $rules;
+  animation-#{$action}: $rules;
+}
 @mixin keyframes($name) {
   @-webkit-keyframes #{$name} { @content; }
   @-moz-keyframes #{$name} { @content; }
   @-ms-keyframes #{$name} { @content; }
+  @-o-keyframes #{$name} { @content; }
   @keyframes #{$name} { @content; }
 }
-@mixin animation-name($name) {
-  -ms-animation-name: $name;
-  -moz-animation-name: $name;
-  -webkit-animation-name: $name;
-  animation-name: $name;
+@function opacityLayer($rotX) {
+  @if ($rotX == 0deg) {
+    @return 1;
+  }
+  @else {
+    @return 0;
+  }
 }
-@mixin animation-duration($duration) {
-  -ms-animation-duration: $duration;
-  -moz-animation-duration: $duration;
-  -webkit-animation-duration: $duration;
-  animation-duration: $duration;
+@mixin layerPrism($i, $timeTotal, $transZ: 0px, $rotX : 0deg) {
+  opacity: opacityLayer($rotX);
+  @include prefixed-browser(transform, rotateX($rotX) translateZ($transZ));
+  @include prefixed-browser(backface-visibility, hidden);
+  @include prefixed-browser(animation-timing-function, ease-out-in);
+  @include prefixed-browser(animation-name, opacityLayers-#{$i});
+  @include prefixed-browser(animation-iteration-count, infinite);
+  @include prefixed-browser(animation-duration, $timeTotal);
 }
-@mixin animation-timing-function($timing) {
-  -ms-animation-timing-function: $timing;
-  -moz-animation-timing-function: $timing;
-  -webkit-animation-timing-function: $timing;
-  animation-timing-function: $timing;
-}
-@mixin animation-iteration-count($iteration) {
-  -ms-animation-iteration-count: $iteration;
-  -moz-animation-iteration-count: $iteration;
-  -webkit-animation-iteration-count: $iteration;
-  animation-iteration-count: $iteration;
-}
-@mixin animation($animation) {
-  -ms-animation: $animation;
-  -moz-animation: $animation;
-  -webkit-animation: $animation;
-  animation: $animation;
-}
-@mixin transform($rules...) {
-  -ms-transform: $rules;
-  -moz-transform: $rules;
-  -webkit-transform: $rules;
-  transform: $rules;
-}
-@mixin transform-origin($rules...) {
-  -ms-transform-origin: $rules;
-  -moz-transform-origin: $rules;
-  -webkit-transform-origin: $rules;
-  transform-origin: $rules;
-}
-@mixin transform-style($rules) {
-  -ms-transform-style: $rules;
-  -moz-transform-style: $rules;
-  -webkit-transform-style: $rules;
-  transform-style: $rules;
-}
-@mixin backface-visibility($value) {
-  -ms-backface-visibility: $value;
-  -moz-backface-visibility: $value;
-  -webkit-backface-visibility: $value;
-  backface-visibility: $value;
+@mixin rotatePrism($height, $width, $colors, $timePause, $timeTotal) {
+  $nsides: length($colors);
+  $transZ: $height/(2*sin(180deg/$nsides)/cos(180deg/$nsides));
+  $stepTimePause: $timePause*100%/$timeTotal;
+  $stepTimeMove: (100%-($stepTimePause*$nsides))/$nsides;
+  @for $i from 0 to $nsides {
+      &.layer-#{$i+1} {
+        display: block;
+        background-color: nth($colors,$i+1);
+        @include layerPrism($i, $timeTotal, $transZ, 360deg*$i/$nsides);
+      }
+  }
+  @include keyframes(rotateLayers) {
+    @for $i from 0 to $nsides {
+      $cframe: floor($i*($stepTimeMove+$stepTimePause));
+      $nframe: floor($cframe + $stepTimePause);
+      #{$cframe, $nframe} {
+        @include prefixed-browser(transform, rotateX(-(360deg*$i/$nsides)));
+      }
+    }
+    100% {@include prefixed-browser(transform, rotateX(-360deg));}
+  }
+  @for $i from 0 to $nsides {
+    @include keyframes(opacityLayers-#{$i}) {
+      @if $i == 0 {
+        0%, #{floor(($i+1)*$stepTimePause)} {
+          opacity: 1;
+          @include prefixed-browser(animation-timing-function, ease-in-out);
+        }
+        #{floor(($i+1)*$stepTimePause) + $stepTimeMove},
+#{floor(100-$stepTimeMove)} {
+          opacity: 0;
+        }
+      }
+      @else {
+        0%, #{floor($i*($stepTimePause+$stepTimeMove) - $stepTimeMove)} {
+          opacity: 0;
+        }
+        #{floor($i*($stepTimePause+$stepTimeMove))},
+#{floor(($i+1)*($stepTimePause+$stepTimeMove) - $stepTimeMove)} {
+          opacity: 1;
+          @include prefixed-browser(animation-timing-function, ease-in-out);
+        }
+        #{floor(($i+1)*($stepTimePause+$stepTimeMove))}, 100% {
+          opacity: 0;
+        }
+      }
+    }
+  }
 }
 
-@include keyframes(spincube) {
-    0%,20%    { @include transform(rotateX(0deg)); }
-    25%,45%   { @include transform(rotateX(-90deg)); }
-    50%,70%   { @include transform(rotateX(-180deg)); }
-    75%,95%   { @include transform(rotateX(-270deg)); }
-    100%  { @include transform(rotateX(-360deg)); }
-}
-@mixin face-cube($trans: 0px, $rotX : 0deg, $rotY : 0deg, $rotZ : 0deg) {
-  @include transform(rotateX($rotX) rotateY($rotY) rotateZ($rotZ)
-translateZ($trans));
-  @include backface-visibility(hidden);
-}
+$height: 200px;
+$width: 350px;
+$colors: #20B2AA #87CEFA #F0E68C #F08080;
+$timePause: 3s;
+$timeTotal: (length($colors)+1)*$timePause+1;
 
-$time: 20s;
-$height: 280px;
-$width: 460px;
-$trans: $height/2;
-.cube {
-  @include animation-name(spincube);
-  @include animation-timing-function(ease-in-out);
-  @include animation-iteration-count(infinite);
-  @include animation-duration($time);
-  @include transform-style(preserve-3d);
-  @include transform-origin(0 $trans 0);
+.container {
+  @include prefixed-browser(perspective, $height*4);
 }
-.cube div {
+#prism {
   position: absolute;
-  width: $width;
-  height: $height;
-  border: 1px solid #ccc;
-  background: rgba(255,255,255,0.8);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-  line-height: $height;
-  text-align: center;
-  font-size: 100px;
-}
-.cube div.front {
-  background-color: #20B2AA;
-  @include face-cube($trans);
-}
-.cube div.top {
-  background-color: #87CEFA;
-  @include face-cube($trans, 90deg);
-}
-.cube div.back {
-  background-color: #F0E68C;
-  @include face-cube($trans, 0deg, 180deg, 180deg);
-}
-.cube div.bottom {
-  background-color: #F08080;
-  @include face-cube($trans, -90deg);
+  top: $height;
+  left: 50%;
+  margin-left: -$width/2;
+  @include prefixed-browser(animation-name, rotateLayers);
+  @include prefixed-browser(animation-timing-function, ease-in-out);
+  @include prefixed-browser(animation-iteration-count, infinite);
+  @include prefixed-browser(animation-duration, $timeTotal);
+  @include prefixed-browser(transform-style, preserve-3d);
+  @include prefixed-browser(transform-origin, 0 $height/2 0);
+  & div {
+    display: none;
+    position: absolute;
+    width: $width;
+    height: $height;
+    border: 2px solid #333;
+    background: rgba(255,255,255,0.8);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    line-height: $height;
+    text-align: center;
+    font-size: 100px;
+    @include rotatePrism($height, $width, $colors, $timePause, $timeTotal);
+  }
 }
